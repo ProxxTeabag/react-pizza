@@ -66,7 +66,6 @@ const Home = () => {
     )
 
     // Если был первый рендер, то проверяем URL-параметры и сохраняем в редуксе
-    // asdsadasdsd
     React.useEffect(() => {
       if (window.location.search) {
         const params = qs.parse(window.location.search.substring(1))
