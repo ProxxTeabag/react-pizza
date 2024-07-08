@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/Slices/filterSlice.js'
-import { setItems } from '../redux/Slices/pizzaSlice.js'
+import { fetchPizzas } from '../redux/Slices/pizzaSlice.js'
 import Skeleton from "../components/PizzaBlock/Skeleton.js"
 import Categories from "../components/Categories";
 import Sort, { sortList } from "../components/Sort";
@@ -19,7 +19,7 @@ const Home = () => {
   const dispatch = useDispatch()
   const isSearch = React.useRef(false)
   const isMounted = React.useRef(false)
-  const items = useSelector(state => state.pizza.items)
+  const { items, status } = useSelector(state => state.pizza.items)
 
   const { categoryId, sort, currentPage } = useSelector(state => state.filter)
   const sortType = sort.Property
@@ -27,7 +27,6 @@ const Home = () => {
 
 
   const { searchValue } = React.useContext(SearchContext)
-    const [isLoading, setisLoading] = React.useState(true)
 
     const onChangeCategory = (id) => {
       dispatch(setCategoryId(id))
@@ -37,8 +36,7 @@ const Home = () => {
     }
 
     // Бизнес логика
-    const fetchPizzas = async () => {
-      setisLoading(true)
+    const getPizzas = async () => {
       const sortBy = sort.sortProperty.replace("-",'')
       const order = sort.sortProperty.includes("-") ? "asc" : "desc"
       const category = categoryId > 0 ? `category=${categoryId}` : ""
@@ -55,15 +53,28 @@ const Home = () => {
     //       console.log(err)
     //     })
 
-  try {
-    const { data } = await axios.get(`https://662553c304457d4aaf9e768b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
-    dispatch(setItems(data))
-  } catch (err) {
-    console.log(err)
-    alert("Unexpected data-pizzas loading")
-  } finally {
-    setisLoading(false)
-  }
+  // try {
+  //   dispatch(fetchPizzas({
+  //     sortBy,
+  //     order,
+  //     category,
+  //     search,
+  //     currentPage
+  //   }))
+  // } catch (err) {
+  //   console.log(err)
+  //   alert("Unexpected data-pizzas loading")
+  // } finally {
+  //   setisLoading(false)
+  // }
+
+      dispatch(fetchPizzas({
+      sortBy,
+      order,
+      category,
+      search,
+      currentPage
+    }))
   window.scroll(0,0)
     }
 
@@ -83,24 +94,12 @@ const Home = () => {
 
     // Если был первый рендер, то проверяем URL-параметры и сохраняем в редуксе
     React.useEffect(() => {
-      if (window.location.search) {
-        const params = qs.parse(window.location.search.substring(1))
-
-        const sort = sortList.find(obj => obj.sortProperty === params.sortProperty)
-
-        dispatch (
-          setFilters({
-            ...params,
-            sort
-          })
-        )
-        isSearch.current = true
-      }
-    }, [])
-    // Если был первый рендер, то запрашиваем пиццы
+      getPizzas()
+    }, [categoryId, sortType, searchValue, currentPage])
+    // Если был первый рендер, то запрашиваем пиццы (парсим)
     React.useEffect(() => {
       window.scrollTo(0,0)
-      !isSearch.current && fetchPizzas()
+      !isSearch.current && getPizzas()
       isSearch.current = false
     }, [categoryId, sortType, searchValue, currentPage])
 
@@ -123,12 +122,16 @@ const Home = () => {
         <Sort />
         </div>
         <h2 className="content__title">Все пиццы</h2>
-        <div className="content__items">
         {
-          isLoading ? skeletons : pizzas
+          status === "error" ? (
+            <div className='content__error-info'>
+             <h2>ERROR</h2>
+             <p>ГДЕ ПИТСЫ???</p> 
+            </div>
+          ) : (<div className="content__items">{status === 'loading' ? skeletons : pizzas}</div>)
         }
+ 
         <Pagination currentPage = {currentPage} onChangePage = {onChangePage} />
-        </div>
     </div>
   )
 }
