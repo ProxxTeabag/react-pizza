@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { setCategoryId, setCurrentPage, setFilters } from '../redux/Slices/filterSlice.js'
+import { setItems } from '../redux/Slices/pizzaSlice.js'
 import Skeleton from "../components/PizzaBlock/Skeleton.js"
 import Categories from "../components/Categories";
 import Sort, { sortList } from "../components/Sort";
@@ -18,7 +19,7 @@ const Home = () => {
   const dispatch = useDispatch()
   const isSearch = React.useRef(false)
   const isMounted = React.useRef(false)
-
+  const items = useSelector(state => state.pizza.items)
 
   const { categoryId, sort, currentPage } = useSelector(state => state.filter)
   const sortType = sort.Property
@@ -26,7 +27,6 @@ const Home = () => {
 
 
   const { searchValue } = React.useContext(SearchContext)
-    const [items, setItems] = React.useState([])
     const [isLoading, setisLoading] = React.useState(true)
 
     const onChangeCategory = (id) => {
@@ -35,20 +35,36 @@ const Home = () => {
     const onChangePage = number => {
       dispatch(setCurrentPage (number))
     }
-    const fetchPizzas = () => {
+
+    // Бизнес логика
+    const fetchPizzas = async () => {
       setisLoading(true)
       const sortBy = sort.sortProperty.replace("-",'')
       const order = sort.sortProperty.includes("-") ? "asc" : "desc"
       const category = categoryId > 0 ? `category=${categoryId}` : ""
       const search = searchValue ? `&search=${searchValue}` : ""
 
-    axios
-    .get(
-      `https://662553c304457d4aaf9e768b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
-        .then ((res) => {
-        setItems(res.data)
-        setisLoading(false)
-        })
+    // axios
+    // .get(
+    //   `https://662553c304457d4aaf9e768b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
+    //     .then ((res) => {
+    //     setItems(res.data)
+    //     setisLoading(false)
+    //     })
+    //     .catch((err) => {
+    //       console.log(err)
+    //     })
+
+  try {
+    const { data } = await axios.get(`https://662553c304457d4aaf9e768b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
+    dispatch(setItems(data))
+  } catch (err) {
+    console.log(err)
+    alert("Unexpected data-pizzas loading")
+  } finally {
+    setisLoading(false)
+  }
+  window.scroll(0,0)
     }
 
     // Если изменили параметры и был первый рендер
