@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export const fetchPizzas = createAsyncThunk(
     'pizza/fetchPizzasById',
-    async (params) => {
+    async (params, thunkAPI) => {
         const {sortBy, order,category, search, currentPage} = params
       const { data } = await axios.get(`https://662553c304457d4aaf9e768b.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`)
       return data
@@ -20,26 +20,29 @@ const pizzaSlice = createSlice({
     name: 'pizza',
     initialState,
     reducers: {
-        setItems(state, action) {
-            state.items = action.payload
-            state.items = []
-        },
+      setItems(state, action) {
+        state.items = action.payload;
+      },
     },
-    extraReducers: { 
-        [fetchPizzas.pending]: (state) => {
-            state.status = "loading"
-        },
-        [fetchPizzas.fulfilled]: (state,action) => {
-        state.items = action.payload
-        state.status = "success"
+    extraReducers: (builder) => {
+      builder.addCase(fetchPizzas.pending, (state, action) => {
+        state.status = "LOADING";
+        state.items = [];
+      });
+  
+      builder.addCase(fetchPizzas.fulfilled, (state, action) => {
+        state.items = action.payload;
+        state.status = "SUCCESS";
+      });
+  
+      builder.addCase(fetchPizzas.rejected, (state, action) => {
+        state.status = "ERROR";
+        state.items = [];
+      });
     },
-         [fetchPizzas.rejected]: (state,action) => {
-        state.status = "error"
-        state.items = []
-    }
-} 
-    }
-)
+  });
+
+export const selectPizzaData = (state) => state.pizza
 
 
 export const { setItems } = pizzaSlice.actions
