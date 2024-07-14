@@ -25,12 +25,9 @@ const Home = () => {
   const isSearch = React.useRef(false);
   const isMounted = React.useRef(false);
   const { items, status } = useSelector(selectPizzaData);
-  const { categoryId, sort, currentPage } = useSelector(selectFilter);
+  const { categoryId, sort, currentPage, searchValue } = useSelector(selectFilter);
   const sortType = sort.Property;
 
-  const { searchValue } = React.useContext(SearchContext);
-
-console.log({categoryId, sortType, searchValue, currentPage})
 
   const onChangeCategory = (id) => {
     dispatch(setCategoryId(id));
