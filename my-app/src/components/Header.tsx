@@ -2,15 +2,26 @@ import React from "react";
 import logoSvg from "../assets/img/pizza-logo.svg"
 import { Link, useLocation } from "react-router-dom";
 import { useSelector } from 'react-redux'
-import { selectCart } from '../redux/Slices/cartSlice';
 
-import Search from "./Search";
+import { Search } from "./Search";
+import { selectCart } from "../redux/cart/selectors";
 
-function Header() {
+export const Header: React.FC = () => {
   const { items, totalCount, totalPrice } = useSelector(selectCart)
   const location = useLocation()
+  const isMounted = React.useRef(false)
  
-  // const totalCount = items.reduce((sum, item) => sum + item.count, 0) (автор видео предложил написать в redux, но передумал, я сделал)
+  // const totalCount = items.reduce((sum, item) => sum + item.count, 0) 
+  // (автор видео предложил написать в redux, но передумал, я сделал)
+
+  React.useEffect(() => {
+    if (!isMounted.current) {
+    const json = JSON.stringify(items)
+    localStorage.setItem('cart', json)
+  }
+  isMounted.current = true
+ }, [items])
+
     return (
         <div className="header">
         <div className="container">
@@ -23,7 +34,7 @@ function Header() {
             </div>
           </div>
           </Link>
-          <Search />
+          { location.pathname !== '/cart' && <Search />}
           <div className="header__cart">
            { location.pathname !== '/cart' && (<Link to="/cart" className="button button--cart">
               <span>{totalPrice} грн</span>
@@ -65,5 +76,3 @@ function Header() {
       </div>
     )
 }
-
-export default Header

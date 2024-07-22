@@ -1,38 +1,29 @@
 import React, { useEffect } from 'react';
-import axios from 'axios';
-import qs from 'qs';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+// import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-import {
-  selectFilter,
-  setCategoryId,
-  setCurrentPage,
-  setFilters,
-} from '../redux/Slices/filterSlice.js';
-import { fetchPizzas, selectPizzaData } from '../redux/Slices/pizzaSlice.js';
-import Skeleton from '../components/PizzaBlock/Skeleton.js';
-import Categories from '../components/Categories';
-import Sort, { sortList } from '../components/Sort';
-import PizzaBlock from '../components/PizzaBlock';
+import {Skeleton, Categories, Sort, PizzaBlock , Pagination} from '../components';
+import { useAppDispatch } from '../redux/store';
+import { selectFilter } from '../redux/filter/selectors';
+import { setCategoryId, setCurrentPage } from '../redux/filter/slice';
+import { selectPizzaData } from '../redux/pizza/selectors';
+import { fetchPizzas } from '../redux/pizza/asyncActions';
 
-import Pagination from '../components/Pagination/index.js';
-
-const Home = () => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const isSearch = React.useRef(false);
-  const isMounted = React.useRef(false);
+const Home: React.FC = () => {
+  // const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  // const isSearch = React.useRef(false);
+  // const isMounted = React.useRef(false);
   const { items, status } = useSelector(selectPizzaData);
   const { categoryId, sort, currentPage, searchValue } = useSelector(selectFilter);
-  const sortType = sort.Property;
+  const sortType = sort.sortProperty;
 
 
-  const onChangeCategory = (id) => {
+  const onChangeCategory = React.useCallback((id: number) => {
     dispatch(setCategoryId(id));
-  };
-  const onChangePage = (number) => {
-    dispatch(setCurrentPage(number));
+  }, [])
+  const onChangePage = (page: number) => {
+    dispatch(setCurrentPage(page));
   };
 
   // Бизнес логика
@@ -48,7 +39,7 @@ const Home = () => {
         order,
         category,
         search,
-        currentPage,
+        currentPage: String(currentPage),
       }),
     );
     window.scroll(0, 0);
@@ -81,21 +72,15 @@ const Home = () => {
   //   isSearch.current = false;
   // }, [categoryId, sortType, searchValue, currentPage]);
 
-  const pizzas = items
-    .filter((value) => {
-      if (value.title.toLowerCase().includes(searchValue.toLowerCase())) {
-        return true;
-      }
-      return false;
-    })
-    .map((value) => <PizzaBlock key={value.id} {...value} />);
+  const pizzas = items.map((value: any) => <PizzaBlock key={value.id} {...value} />);
+
   const skeletons = [...new Array(6)].map((_, index) => <Skeleton key={index} />);
 
   return (
     <div className="container">
       <div className="content__top">
         <Categories value={categoryId} onChangeCategory={onChangeCategory} />
-        <Sort />
+        <Sort value={sort}/>
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === 'error' ? (
