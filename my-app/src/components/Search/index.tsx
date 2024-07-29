@@ -3,6 +3,7 @@ import debounce from 'lodash.debounce'
 import styles from "./Search.module.scss"
 import { useDispatch } from 'react-redux'
 import { setSearchValue } from '../../redux/filter/slice'
+import { constrainedMemory } from 'process'
 
 
  export const Search: React.FC = () => {
@@ -24,8 +25,7 @@ import { setSearchValue } from '../../redux/filter/slice'
   const updateSearchValue = React.useCallback(
       debounce((str: string) => {
         dispatch(setSearchValue(str))
-      }, 150),
-      []
+      }, 500),[]
     )
     
   const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {

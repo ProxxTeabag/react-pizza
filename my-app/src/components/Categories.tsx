@@ -23,8 +23,8 @@ export const Categories: React.FC<CategoriesProps> = React.memo(({ value, onChan
           {
             categories.map((categoryName, index) => (
             <li 
-            key ={index}
-            onClick ={() =>  onChangeCategory(index)} className={value === index ? "active" : ""}>{categoryName}
+            key={index}
+            onClick={() => onChangeCategory(index)} className={value === index ? "active" : ""}>{categoryName}
             </li> 
           ))
           }

@@ -20,9 +20,11 @@ const Home: React.FC = () => {
 
 
   const onChangeCategory = React.useCallback((id: number) => {
+    console.log('onChangeCategory', id);
     dispatch(setCategoryId(id));
   }, [])
   const onChangePage = (page: number) => {
+    console.log('onChangePage', page);
     dispatch(setCurrentPage(page));
   };
 

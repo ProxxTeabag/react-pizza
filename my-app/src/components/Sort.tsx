@@ -9,7 +9,7 @@ type SortItem = {
 }
 
 type PopupClick = MouseEvent & {
-  path: Node[];
+  pathName: Node[];
 }
 
 export const sortList: SortItem[] = [
@@ -40,11 +40,11 @@ export const Sort: React.FC<SortPopupProps> = React.memo(( {value} ) => {
 // 16 видео, не получается найти event.path.include, из-за чего код не работает (свернуть popup-list кликнув на body страницу)
 React.useEffect(() => {
   const handleClickOutside = (event: MouseEvent) => {
-    console.log(event)
+    // console.log(event)
     const _event = event as PopupClick;
 
     if (sortRef.current && !_event.view?.location.pathname.includes(sortRef.current as unknown as string)) {
-      setOpen(false);
+      // setOpen(false);
     }
   };
 
